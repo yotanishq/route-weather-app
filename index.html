@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+
+    .logo-svg {
+    display: block;
+    margin: 0 auto 25px;
+    }
+
+    .logo-svg text {
+    fill: #8a2be2;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    text-shadow:
+        0 0 10px rgba(138, 43, 226, 0.8),
+        0 0 25px rgba(138, 43, 226, 0.6);
+    }
+
+    body {
+    font-family: 'Inter', Arial, sans-serif;
+    background: radial-gradient(
+        circle at top,
+        #16161f 0%,
+        #0e0e11 70%
+    );
+    color: #f5f5f7;
+    margin: 0;
+    padding: 60px 20px; 
+    }
+
+
+    .app-container {
+    max-width: 900px;
+    margin: 0 auto; 
+    }
+
+
+    .logo {
+        text-align: center;
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: 3px;
+        color: #4f0dab;
+        margin-bottom: 20px;
+        text-shadow: 0 0 8px rgba(138, 43, 226, 0.6),
+                     0 0 16px rgba(138, 43, 226, 0.4);
+    }
+
+    h1 {
+    text-align: center;
+    font-size: 38px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 10px;
+    color: #ffffff;
+    }
+
+
+    .subtitle {
+    text-align: center;
+    color: #b3b3c6;
+    font-size: 16px;
+    max-width: 600px;
+    margin: 0 auto 50px;
+    }
+
+
+    .card {
+    background: #181822;
+    padding: 32px;
+    max-width: 620px;
+    margin: 0 auto;
+    border-radius: 14px;
+    box-shadow:
+        0 10px 40px rgba(0, 0, 0, 0.8),
+        0 0 25px rgba(138, 43, 226, 0.12);
+    }
+
+
+    label {
+        display: block;
+        margin-top: 18px;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #cfcfe6;
+        font-size: 15px;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 12px;
+        background: #0e0e11;
+        border: 1px solid #2a2a36;
+        border-radius: 8px;
+        color: #ffffff;
+        font-size: 15px;
+    }
+
+    input:focus, select:focus {
+        border-color: #8a2be2;
+        box-shadow: 0 0 10px rgba(138, 43, 226, 0.7);
+        outline: none;
+    }
+
+    button {
+        margin-top: 28px;
+        padding: 14px;
+        width: 100%;
+        background: linear-gradient(135deg, #8a2be2, #6f1fd1);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 0 22px rgba(138, 43, 226, 0.7);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 32px rgba(138, 43, 226, 1);
+    }
+
+    .result-card {
+        margin: 40px auto 0;
+        background: #15151c;
+        padding: 30px;
+        max-width: 800px;
+        border-radius: 14px;
+        white-space: pre-line;
+        line-height: 1.6;
+        font-size: 15px;
+        box-shadow:
+        0 0 25px rgba(0, 0, 0, 0.7),
+        0 0 35px rgba(138, 43, 226, 0.15);
+    }
+    </style>
+
+
+    <title>Route Weather App</title>
+  </head>
+    <body>
+
+    <h1>Route Weather App</h1>
+    <p class="subtitle">Check weather and transport feasibility along your route</p>
+
+    <div class="card">
+        <label>Start Location</label>
+        <input type="text" id="start" placeholder="Enter starting city">
+
+        <label>End Location</label>
+        <input type="text" id="end" placeholder="Enter destination city">
+
+        <label>Transport Mode</label>
+        <select id="transport">
+        <option value="two_wheeler">Two-Wheeler</option>
+        <option value="car">Car / Four-Wheeler</option>
+        <option value="train">Train</option>
+        <option value="plane">Plane</option>
+        </select>
+
+        <button onclick="checkRoute()">Check Route Weather</button>
+    </div>
+
+    <div id="result" class="result-card"></div>
+
+
+    <script>
+    const API_KEY = "493f3f75549e1f608aed06f9891e00d5";
+
+    /* ---------------- WEATHER ---------------- */
+    async function getWeather(city) {
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`;
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error("City not found: " + city);
+    }
+
+    return {
+        temp: data.main.temp,
+        desc: data.weather[0].description,
+        lat: data.coord.lat,
+        lon: data.coord.lon
+    };
+    }
+
+    /* ---------------- DISTANCE ---------------- */
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+
+    const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(lat1 * Math.PI / 180) *
+        Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) ** 2;
+
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    /* ---------------- TRANSPORT RULES ---------------- */
+    const transportRules = {
+    plane: {
+        advice(desc, d) {
+            const weather = desc.toLowerCase();
+
+            if (d < 300) {
+            return "❌ Not practical: Distance too short for air travel";
+            }
+
+            if (d > 8000) {
+            return "⚠️ Very long international flight (" + d.toFixed(1) + " km)";
+            }
+
+            if (
+            weather.includes("thunderstorm") ||
+            weather.includes("heavy rain") ||
+            weather.includes("snow")
+            ) {
+            return "⚠️ Flight feasible, but delays likely due to weather";
+            }
+
+            if (weather.includes("fog") || weather.includes("mist")) {
+            return "⚠️ Possible delays due to low visibility";
+            }
+
+            return "✅ Air travel looks suitable";
+        }
+    },
+
+    two_wheeler: {
+        maxOk: 200,
+        caution: 5000,
+        advice(desc, d) {
+        if (d > this.caution) return `❌ Not recommended: Too far for two-wheeler (${d.toFixed(1)} km)`;
+        if (desc.includes("heavy rain") || desc.includes("thunderstorm"))
+            return "❌ Not recommended: Heavy rain";
+        if (desc.includes("rain") || desc.includes("fog") || desc.includes("mist"))
+            return "⚠️ Caution: Reduced visibility";
+        if (d > this.maxOk) return "⚠️ Caution: Long distance";
+        return "✅ Two-wheeler travel looks okay";
+        }
+    },
+
+    car: {
+        maxOk: 1000,
+        caution: 1500,
+        advice(desc, d) {
+        if (d > 2000) return `❌ Not recommended: Extremely long drive (${d.toFixed(1)} km)`;
+        if (desc.includes("heavy rain") || desc.includes("thunderstorm"))
+            return "⚠️ Caution: Bad weather may affect driving";
+        if (d > this.caution) return "⚠️ Caution: Long drive";
+        return "✅ Car travel looks okay";
+        }
+    },
+
+    train: {
+        advice(desc, d) {
+        if (d < 50) return "❌ Not practical for train";
+        if (d > 2000) return "⚠️ Very long train journey";
+        if (desc.includes("fog") || desc.includes("rain"))
+            return "⚠️ Delays possible due to weather";
+        return "✅ Train travel looks suitable";
+        }
+    }
+    };
+
+    /* ---------------- MAIN ---------------- */
+    async function checkRoute() {
+    const startCity = document.getElementById("start").value;
+    const endCity = document.getElementById("end").value;
+    const transport = document.getElementById("transport").value;
+
+    if (!startCity || !endCity) {
+        document.getElementById("result").innerText =
+        "Please enter both start and end locations.";
+        return;
+    }
+
+    try {
+        const start = await getWeather(startCity);
+        const end = await getWeather(endCity);
+
+        const distance = calculateDistance(start.lat, start.lon, end.lat, end.lon);
+        const advice =
+        transportRules[transport].advice(start.desc, distance);
+
+        document.getElementById("result").innerText =
+        `START LOCATION: ${startCity}
+    • Temperature: ${start.temp}°C
+    • Weather: ${start.desc}
+
+    DISTANCE
+    • Approx straight-line distance: ${distance.toFixed(1)} km
+    • Note: Actual road distance may be longer
+
+    TRAVEL ASSESSMENT (${transport.toUpperCase().replace("_", " ")})
+    • ${advice}
+
+    END LOCATION: ${endCity}
+    • Temperature: ${end.temp}°C
+    • Weather: ${end.desc}`;
+
+    } catch (err) {
+        document.getElementById("result").innerText = "❌ Error: " + err.message;
+    }
+    }
+    </script>
+
+
+
+
+  </body>
+</html>
