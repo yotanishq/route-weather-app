@@ -221,5 +221,12 @@
     cursor: not-allowed;
     }
 
+    .form-error {
+    margin-top: 12px;
+    font-size: 0.9rem;
+    color: #ffb4b4;
+    opacity: 0.9;
+    }
+
             
         

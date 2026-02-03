@@ -105,6 +105,9 @@
     async function checkRoute() {
     const button = document.getElementById("checkBtn");
     const loadingText = document.getElementById("loading");
+    const errorBox = document.getElementById("formError");
+    errorBox.style.display = "none";
+    errorBox.innerText = "";
 
     button.disabled = true;
     loadingText.style.display = "block";
@@ -114,10 +117,21 @@
     const transport = document.getElementById("transport").value;
 
     if (!startCity || !endCity) {
-        document.getElementById("result").innerText =
-        "Please enter both start and end locations.";
-        return;
+    errorBox.innerText = "Please enter both start and end locations.";
+    errorBox.style.display = "block";
+    button.disabled = false;
+    loadingText.style.display = "none";
+    return;
     }
+
+    if (startCity.toLowerCase() === endCity.toLowerCase()) {
+    errorBox.innerText = "Start and end locations cannot be the same.";
+    errorBox.style.display = "block";
+    button.disabled = false;
+    loadingText.style.display = "none";
+    return;
+    }
+
 
     try {
         const start = await getWeather(startCity);
