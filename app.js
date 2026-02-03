@@ -7,6 +7,10 @@
     const response = await fetch(url);
     const data = await response.json();
 
+    if (data.cod === "404") {
+    throw new Error(`City "${city}" not found`);
+    }
+
     if (!response.ok) {
         throw new Error("City not found: " + city);
     }
@@ -171,7 +175,13 @@
 
 
     } catch (err) {
-        document.getElementById("result").innerText = "❌ Error: " + err.message;
+       document.getElementById("result").innerHTML = `
+        <div class="result-section">
+            <h3>Something went wrong</h3>
+            <p>${err.message}</p>
+        </div>
+        `;
+
     }
     finally {
         button.disabled = false;
