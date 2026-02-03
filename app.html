@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Route Weather App</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar">
+    <div class="nav-logo">RouteWeather</div>
+    <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="app.html">App</a>
+        <a href="#">About</a>
+    </div>
+    </nav>
+
+    <div class="page-bg">
+    <div class="container">
+
+      <h1>Route Weather App</h1>
+      <p class="subtitle">
+        Check weather and transport feasibility along your route
+      </p>
+
+      <div class="card">
+        <label>Start Location</label>
+        <input type="text" id="start" placeholder="Enter starting city">
+
+        <label>End Location</label>
+        <input type="text" id="end" placeholder="Enter destination city">
+
+        <label>Transport Mode</label>
+        <select id="transport">
+          <option value="two_wheeler">Two-Wheeler</option>
+          <option value="car">Car / Four-Wheeler</option>
+          <option value="train">Train</option>
+          <option value="plane">Plane</option>
+        </select>
+
+        <button id="checkBtn" onclick="checkRoute()">Check Route Weather</button>
+        <p id="loading" class="loading-text" style="display: none;">Fetching weather data…</p>
+
+      </div>
+
+      <div id="result" class="result-card"></div>
+
+    </div>
+  </div>
+
+  <!-- JS ALWAYS at the end -->
+  <script src="app.js"></script>
+</body>
+</html>
