@@ -9,7 +9,7 @@
     }
 
     .container {
-    max-width: 420px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 80px 20px;
     }
@@ -96,7 +96,9 @@
 
 
     .card, .result-card {
-    background: rgba(20, 20, 30, 0.8);
+    background: rgba(25, 25, 40, 0.6);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.08);
     border-radius: 16px;
     padding: 20px;
     margin-top: 24px;
@@ -259,4 +261,29 @@
     border-radius: 20px;
     overflow: hidden;
     box-shadow: 0 0 30px rgba(140, 80, 255, 0.25);
+    }
+    
+    .main-grid {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 24px;
+    margin-top: 30px;
+    }
+
+    @media (max-width: 900px) {
+    .main-grid {
+        grid-template-columns: 1fr;
+    }
+    }
+
+    .card,
+    .result-card,
+    #map {
+    transition: transform 0.25s ease;
+    }
+
+    .card:hover,
+    .result-card:hover,
+    #map:hover {
+    transform: translateY(-4px);
     }
