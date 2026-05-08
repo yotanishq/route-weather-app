@@ -5,7 +5,10 @@
   <title>Route Weather App</title>
 
   <link rel="stylesheet" href="style.css">
-
+  <link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet/dist/leaflet.css"
+  />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -31,10 +34,12 @@
 
       <div class="card">
         <label>Start Location</label>
-        <input type="text" id="start" placeholder="Enter starting city">
+        <input type="text" id="start" placeholder="Enter starting city" autocomplete="off">
+        <div class="suggestions" id="startSuggestions"></div>
 
         <label>End Location</label>
-        <input type="text" id="end" placeholder="Enter destination city">
+        <input type="text" id="end" placeholder="Enter destination city" autocomplete="off">
+        <div class="suggestions" id="endSuggestions"></div>
 
         <p id="formError" class="form-error" style="display: none;"></p>
 
@@ -52,11 +57,12 @@
       </div>
 
       <div id="result" class="result-card"></div>
-
+      <div id="map"></div>
     </div>
   </div>
 
   <!-- JS ALWAYS at the end -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

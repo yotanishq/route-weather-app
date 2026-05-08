@@ -1,3 +1,15 @@
+    const map = L.map('map').setView([22.9734, 78.6569], 5);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    let currentRoute = null;
+    let startMarker = null;
+    let endMarker = null;
+
+    let selectedStartCity = null;
+    let selectedEndCity = null;
 
     const API_KEY = "493f3f75549e1f608aed06f9891e00d5";
 
@@ -23,6 +35,25 @@
     };
     }
 
+    async function getWeatherByCoords(lat, lon) {
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (!res.ok) {
+        throw new Error("Weather lookup failed");
+    }
+
+    return {
+        temp: data.main.temp,
+        desc: data.weather[0].description,
+        lat: data.coord.lat,
+        lon: data.coord.lon
+    };
+    }
+
+
+
     /* ---------------- DISTANCE ---------------- */
     function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371;
@@ -36,6 +67,44 @@
         Math.sin(dLon / 2) ** 2;
 
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+     /* ---------------- DRAW ROUTE ---------------- */
+    function drawRoute(start, end) {
+
+    if (currentRoute) {
+        map.removeLayer(currentRoute);
+    }
+
+    if (startMarker) {
+        map.removeLayer(startMarker);
+    }
+
+    if (endMarker) {
+        map.removeLayer(endMarker);
+    }
+
+    startMarker = L.marker([start.lat, start.lon])
+        .addTo(map)
+        .bindPopup("Start");
+
+    endMarker = L.marker([end.lat, end.lon])
+        .addTo(map)
+        .bindPopup("Destination");
+
+    currentRoute = L.polyline(
+        [
+        [start.lat, start.lon],
+        [end.lat, end.lon]
+        ],
+        {
+        color: '#8f3cff',
+        weight: 5
+        }
+    ).addTo(map);
+
+    map.fitBounds(currentRoute.getBounds(), {
+        padding: [50, 50]
+    });
     }
 
     /* ---------------- TRANSPORT RULES ---------------- */
@@ -104,9 +173,37 @@
         }
     }
     };
+    async function fetchCitySuggestions(query) {
+    if (query.length < 2) return [];
+
+    const res = await fetch(
+        `https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=10&appid=${API_KEY}`
+    );
+    return await res.json();
+    }
+
+    handleInput("start", "startSuggestions", city => {
+    selectedStartCity = city;
+    });
+
+    handleInput("end", "endSuggestions", city => {
+    selectedEndCity = city;
+    });
+
+
 
     /* ---------------- MAIN ---------------- */
     async function checkRoute() {
+
+    if (!selectedStartCity || !selectedEndCity) {
+    document.getElementById("result").innerHTML = `
+        <p class="error">
+        ❌ Please select cities from the suggestions list.
+        </p>
+    `;
+    return;
+    }
+
     const button = document.getElementById("checkBtn");
     const loadingText = document.getElementById("loading");
     const errorBox = document.getElementById("formError");
@@ -119,6 +216,7 @@
     const startCity = document.getElementById("start").value;
     const endCity = document.getElementById("end").value;
     const transport = document.getElementById("transport").value;
+
 
     if (!startCity || !endCity) {
     errorBox.innerText = "Please enter both start and end locations.";
@@ -138,10 +236,28 @@
 
 
     try {
-        const start = await getWeather(startCity);
-        const end = await getWeather(endCity);
+        if (!selectedStartCity || !selectedEndCity) {
+        errorBox.innerText = "Please select cities from the suggestions list.";
+        errorBox.style.display = "block";
+        button.disabled = false;
+        loadingText.style.display = "none";
+        return;
+        }
+
+        const start = await getWeatherByCoords(
+        selectedStartCity.lat,
+        selectedStartCity.lon
+        );
+
+        const end = await getWeatherByCoords(
+        selectedEndCity.lat,
+        selectedEndCity.lon
+        );
 
         const distance = calculateDistance(start.lat, start.lon, end.lat, end.lon);
+
+        drawRoute(start, end);
+        
         const advice =
         transportRules[transport].advice(start.desc, distance);
 
@@ -187,4 +303,42 @@
         button.disabled = false;
         loadingText.style.display = "none";
     }
+    }
+    async function handleInput(inputId, suggestionId, setter) {
+    const input = document.getElementById(inputId);
+    const box = document.getElementById(suggestionId);
+
+    input.addEventListener("input", async () => {
+        setter(null);
+        const query = input.value.trim();
+        box.innerHTML = "";
+
+        if (query.length < 2) return;
+
+        const results = await fetchCitySuggestions(query);
+
+        const seen = new Set();
+
+        results
+        .filter(city => city.country === "IN")
+        .forEach(city => {
+            const key = `${city.name}-${city.country}`;
+            if (seen.has(key)) return;
+            seen.add(key);
+
+            const div = document.createElement("div");
+            div.className = "suggestion-item";
+            div.innerText = `${city.name}, ${city.country}`;
+
+            div.onclick = () => {
+            input.value = city.name;
+            setter(city);
+            box.innerHTML = "";
+            };
+
+            box.appendChild(div);
+        });
+
+
+    });
     }

@@ -228,5 +228,35 @@
     opacity: 0.9;
     }
 
-            
-        
+    .suggestions {
+    background: rgba(20,20,30,0.9);
+    border-radius: 8px;
+    margin-top: 6px;
+    max-height: 180px;
+    overflow-y: auto;
+    }
+
+    .suggestion-item {
+    padding: 10px;
+    cursor: pointer;
+    color: #ddd;
+    }
+
+    .suggestion-item:hover {
+    background: rgba(138,43,226,0.3);
+    }
+
+
+    .error {
+    color: #ff7a7a;
+    font-weight: 500;
+    }
+
+    #map {
+    height: 500px;
+    width: 100%;
+    margin-top: 30px;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 0 30px rgba(140, 80, 255, 0.25);
+    }
